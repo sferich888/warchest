@@ -6,12 +6,13 @@ function usage(){
 } 
 
 function smash(){
-    $dictionary | while read i; do
-        if echo "${i}" | cryptsetup luksOpen ${device} ${mount_point_name} -; then
+    while read i; do
+        if echo "${i}" | cryptsetup luksOpen ${device} ${mount_point_name} ; then
            echo "********* ${i} *********** Success!"
            exit
         fi
-     
+        sleep .5 
+        clear
         try=$(expr ${try} + 1)
         now_sec=$(date +%s)
      
@@ -21,37 +22,40 @@ function smash(){
         eta_date=$(echo $(date -d "1970-01-01 UTC ${eta} seconds"))
         echo "ESTIMATED COMPLETION: ${eta_date}"
         echo
-    done
+    done < $dictionary
 }
+
+begin=$(date)
+begin_sec=$(date +%s)
+try=0
+dictionary="/tmp/luks_dict"
+
+device=/dev/null
+mount_point_name="device"
 
 if [[ -n $1 ]]; then 
     device=$1
 else
+    echo "    Device not specified. $1"
     usage
 fi
-if [[ -n $2 ]] && [[ -d $2 ]]; then 
+if [[ -n $2 ]]; then 
     mount_point=$2
 else
+    echo "    Device name not specified."
     usage
 fi
 if [[ -n $3 ]]; then 
-    if [[ -d $3 ]]; then
+    if [[ -f $3 ]]; then
         dictionary=$3
     else
         echo "Supplied Dictionary dose not exsit!"
         exit
     fi
 else
+    echo "    Dictionary not specified."
     usage
 fi
 
-begin=$(date)
-begin_sec=$(date +%s)
-try=0
-dictionary=/tmp/luks_dict
-total=$(echo $dictionary | wc -w)
-
-device=/dev/null
-mount_point_name="device"
-
-smash()
+total=$(cat $dictionary | wc -l)
+smash
