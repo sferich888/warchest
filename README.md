@@ -1,4 +1,4 @@
 warchest
 ========
 
-A set of Computer Forensics adn Computer Security scripts and tool. 
+A set of Computer Forensics and Computer Security scripts and tool. 
